@@ -1,4 +1,3 @@
-
 import logging
 import gspread
 from datetime import datetime
@@ -11,9 +10,12 @@ from keep_alive import keep_alive
 keep_alive()
 
 # Configuração de log
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
 
-# Escopo de acesso
+# Escopo de acesso para Google Sheets
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 
 # Autenticação com Google Sheets
@@ -32,18 +34,24 @@ def start(update: Update, context: CallbackContext):
 def salvar_email(update: Update, context: CallbackContext):
     user = update.message.from_user
     email = update.message.text.strip()
-    if user.username in usuarios_registrados:
+    
+    # Para evitar erro caso username seja None
+    username = user.username if user.username else str(user.id)
+    
+    if username in usuarios_registrados:
         update.message.reply_text("⚠️ Você já enviou seu e-mail.")
         return
+    
+    # Validação simples de e-mail
     if "@" in email and "." in email:
         agora = datetime.now().strftime("%d/%m/%Y %H:%M")
-        spreadsheet.append_row([user.full_name, "@" + user.username, email, agora])
-        usuarios_registrados.add(user.username)
+        full_name = user.full_name if user.full_name else user.first_name
+        spreadsheet.append_row([full_name, "@" + username if user.username else username, email, agora])
+        usuarios_registrados.add(username)
         update.message.reply_text("✅ E-mail cadastrado com sucesso! Boa sorte!")
     else:
         update.message.reply_text("❌ Por favor, envie um e-mail válido.")
 
-# Inicialização do bot
 def main():
     updater = Updater("7671962811:AAH2HTkKPo7M3m2LLezx-WSC8-3p4UqDrco", use_context=True)
     dp = updater.dispatcher
