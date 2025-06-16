@@ -2,7 +2,15 @@ services:
   - type: web
     name: gramify-bot
     env: python
-    plan: free
+    pythonVersion: "3.12"  # Usar Python 3.12 para evitar erro imghdr
+    region: oregon           # Ajuste para sua região preferida
+    branch: main             # Branch do GitHub para deploy automático
     buildCommand: "pip install -r requirements.txt"
     startCommand: "python main.py"
     autoDeploy: true
+    plan: free               # Ou paid, conforme seu plano
+    envVars:
+      - key: TELEGRAM_TOKEN
+        value: "seu_token_aqui"  # Coloque seu token do Telegram aqui
+      - key: GOOGLE_CREDENTIALS_JSON
+        value: '{"type": "..."}' # Caso use Google API, cole o JSON aqui ou use arquivo no código
